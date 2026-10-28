@@ -4,7 +4,7 @@
   "description": "A cloud-based, serverless expense tracker built on Azure Free Tier.",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "echo \"Static build - no build needed\""
   },
   "keywords": [],
   "author": "",
