@@ -603,17 +603,22 @@ function navigateTo(page) {
    ADD / EDIT FORM
 ================================================ */
 function resetForm() {
-  $('expenseForm').reset();
-  $('editExpenseId').value = '';
-  $('addPageTitle').textContent = 'Add Expense';
-  $('submitLabel').textContent = 'Save Expense';
-  $('cancelEdit').style.display = 'none';
-  $('uploadContent').classList.remove('hidden');
-  $('uploadPreview').classList.add('hidden');
-  $('uploadProgress').classList.add('hidden');
+  const form = $('expenseForm');
+  if (form) form.reset();
+  const editId = $('editExpenseId');
+  if (editId) editId.value = '';
+  const title = $('addPageTitle');
+  if (title) title.textContent = 'Add Expense';
+  const label = $('submitLabel');
+  if (label) label.textContent = 'Save Expense';
+  const cancel = $('cancelEdit');
+  if (cancel) cancel.style.display = 'none';
+  $('uploadContent')?.classList.remove('hidden');
+  $('uploadPreview')?.classList.add('hidden');
+  $('uploadProgress')?.classList.add('hidden');
   state.editingId = null;
-  // Set today's date by default
-  $('expDate').value = today();
+  const expDate = $('expDate');
+  if (expDate) expDate.value = today();
 }
 
 function startEdit(id) {
@@ -621,20 +626,24 @@ function startEdit(id) {
   if (!e) return;
   state.editingId = id;
   navigateTo('add');
-  $('editExpenseId').value = id;
-  $('addPageTitle').textContent = 'Edit Expense';
-  $('submitLabel').textContent = 'Update Expense';
-  $('cancelEdit').style.display = 'inline-flex';
-  $('expAmount').value = e.amount;
-  $('expDate').value = e.date;
-  $('expDescription').value = e.description;
-  $('expCategory').value = e.category;
-  $('expPayment').value = e.paymentMethod || 'Card';
-  $('expNotes').value = e.notes || '';
+  const editId = $('editExpenseId');
+  if (editId) editId.value = id;
+  const title = $('addPageTitle');
+  if (title) title.textContent = 'Edit Expense';
+  const label = $('submitLabel');
+  if (label) label.textContent = 'Update Expense';
+  const cancel = $('cancelEdit');
+  if (cancel) cancel.style.display = 'inline-flex';
+  if ($('expAmount')) $('expAmount').value = e.amount;
+  if ($('expDate')) $('expDate').value = e.date;
+  if ($('expDescription')) $('expDescription').value = e.description;
+  if ($('expCategory')) $('expCategory').value = e.category;
+  if ($('expPayment')) $('expPayment').value = e.paymentMethod || 'Card';
+  if ($('expNotes')) $('expNotes').value = e.notes || '';
   if (e.receiptUrl) {
-    $('previewImg').src = e.receiptUrl;
-    $('uploadContent').classList.add('hidden');
-    $('uploadPreview').classList.remove('hidden');
+    if ($('previewImg')) $('previewImg').src = e.receiptUrl;
+    $('uploadContent')?.classList.add('hidden');
+    $('uploadPreview')?.classList.remove('hidden');
   }
 }
 
