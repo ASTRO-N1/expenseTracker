@@ -127,6 +127,21 @@ const devStore = {
   save: (expenses) => localStorage.setItem('sw_expenses', JSON.stringify(expenses)),
 };
 
+async function parseResponseError(res, fallback) {
+  try {
+    const text = await res.text();
+    try {
+      const json = JSON.parse(text);
+      if (json && (json.error || json.message)) return json.error || json.message;
+    } catch {}
+    if (text && text.trim().length > 0) {
+      const clean = text.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+      return clean.slice(0, 160);
+    }
+  } catch {}
+  return `HTTP ${res.status}: ${fallback}`;
+}
+
 async function apiGetExpenses(year, month) {
   if (isOfflineMode()) {
     const all = devStore.getAll();
@@ -137,8 +152,7 @@ async function apiGetExpenses(year, month) {
   }
   const res = await fetch(`${API_BASE}/get-expenses?year=${year}&month=${month}`);
   if (!res.ok) {
-    const errData = await res.json().catch(() => ({}));
-    throw new Error(errData.error || `HTTP ${res.status}: Failed to fetch expenses`);
+    throw new Error(await parseResponseError(res, 'Failed to fetch expenses'));
   }
   return await res.json();
 }
@@ -157,8 +171,7 @@ async function apiAddExpense(expense) {
     body: JSON.stringify(expense)
   });
   if (!res.ok) {
-    const errData = await res.json().catch(() => ({}));
-    throw new Error(errData.error || `HTTP ${res.status}: Failed to add expense`);
+    throw new Error(await parseResponseError(res, 'Failed to add expense'));
   }
   return await res.json();
 }
@@ -177,8 +190,7 @@ async function apiUpdateExpense(id, expense) {
     body: JSON.stringify(expense)
   });
   if (!res.ok) {
-    const errData = await res.json().catch(() => ({}));
-    throw new Error(errData.error || `HTTP ${res.status}: Failed to update expense`);
+    throw new Error(await parseResponseError(res, 'Failed to update expense'));
   }
   return await res.json();
 }
@@ -191,8 +203,7 @@ async function apiDeleteExpense(id) {
   }
   const res = await fetch(`${API_BASE}/delete-expense/${id}`, { method: 'DELETE' });
   if (!res.ok) {
-    const errData = await res.json().catch(() => ({}));
-    throw new Error(errData.error || `HTTP ${res.status}: Failed to delete expense`);
+    throw new Error(await parseResponseError(res, 'Failed to delete expense'));
   }
   return true;
 }
@@ -223,8 +234,7 @@ async function apiUploadReceipt(file, expenseId) {
     })
   });
   if (!res.ok) {
-    const errData = await res.json().catch(() => ({}));
-    throw new Error(errData.error || `HTTP ${res.status}: Failed to upload receipt`);
+    throw new Error(await parseResponseError(res, 'Failed to upload receipt'));
   }
   const { url } = await res.json();
   return url;
