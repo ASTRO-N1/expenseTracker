@@ -1,6 +1,6 @@
 /**
  * cosmosClient.js — Shared Cosmos DB client instance
- * Used by all Azure Function handlers with auto database/container creation
+ * Used by all Azure Function handlers
  */
 
 const { CosmosClient } = require('@azure/cosmos');
@@ -23,14 +23,9 @@ async function getContainer() {
   const dbId = process.env.COSMOS_DATABASE_ID || 'ExpenseTrackerDB';
   const containerId = process.env.COSMOS_CONTAINER_ID || 'Expenses';
 
-  // Auto-create database & container if they don't already exist
-  const { database } = await client.databases.createIfNotExists({ id: dbId });
-  const { container: c } = await database.containers.createIfNotExists({
-    id: containerId,
-    partitionKey: { paths: ['/userId'] }
-  });
+  const database = client.database(dbId);
+  container = database.container(containerId);
 
-  container = c;
   return container;
 }
 
