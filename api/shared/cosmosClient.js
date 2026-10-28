@@ -1,12 +1,37 @@
 /**
  * cosmosClient.js — Shared Cosmos DB client instance
- * Used by all Azure Function handlers
+ * Used by all Azure Function handlers with auto database/container creation
  */
 
 const { CosmosClient } = require('@azure/cosmos');
 
-const client = new CosmosClient(process.env.COSMOS_CONNECTION_STRING);
-const database = client.database(process.env.COSMOS_DATABASE_ID || 'ExpenseTrackerDB');
-const container = database.container(process.env.COSMOS_CONTAINER_ID || 'Expenses');
+let client = null;
+let container = null;
 
-module.exports = { client, database, container };
+async function getContainer() {
+  if (container) return container;
+
+  const connStr = process.env.COSMOS_CONNECTION_STRING;
+  if (!connStr) {
+    throw new Error('COSMOS_CONNECTION_STRING is missing in Azure Static Web App environment variables.');
+  }
+
+  if (!client) {
+    client = new CosmosClient(connStr);
+  }
+
+  const dbId = process.env.COSMOS_DATABASE_ID || 'ExpenseTrackerDB';
+  const containerId = process.env.COSMOS_CONTAINER_ID || 'Expenses';
+
+  // Auto-create database & container if they don't already exist
+  const { database } = await client.databases.createIfNotExists({ id: dbId });
+  const { container: c } = await database.containers.createIfNotExists({
+    id: containerId,
+    partitionKey: { paths: ['/userId'] }
+  });
+
+  container = c;
+  return container;
+}
+
+module.exports = { getContainer };

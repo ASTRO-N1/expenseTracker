@@ -5,7 +5,7 @@
  * Updates an existing expense document in Cosmos DB.
  */
 
-const { container } = require('../shared/cosmosClient');
+const { getContainer } = require('../shared/cosmosClient');
 
 module.exports = async function (context, req) {
   const headers = {
@@ -21,6 +21,7 @@ module.exports = async function (context, req) {
   }
 
   try {
+    const container = await getContainer();
     const userId = getUserId(req);
     const id = context.bindingData.id;
     const body = req.body;

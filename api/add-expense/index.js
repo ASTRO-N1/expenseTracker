@@ -6,7 +6,7 @@
  * Creates a new expense document in Cosmos DB.
  */
 
-const { container } = require('../shared/cosmosClient');
+const { getContainer } = require('../shared/cosmosClient');
 const { v4: uuidv4 } = require('uuid');
 
 module.exports = async function (context, req) {
@@ -23,6 +23,7 @@ module.exports = async function (context, req) {
   }
 
   try {
+    const container = await getContainer();
     const userId = getUserId(req);
     const body = req.body;
 

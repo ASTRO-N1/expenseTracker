@@ -136,7 +136,10 @@ async function apiGetExpenses(year, month) {
     });
   }
   const res = await fetch(`${API_BASE}/get-expenses?year=${year}&month=${month}`);
-  if (!res.ok) throw new Error('Failed to fetch expenses');
+  if (!res.ok) {
+    const errData = await res.json().catch(() => ({}));
+    throw new Error(errData.error || `HTTP ${res.status}: Failed to fetch expenses`);
+  }
   return await res.json();
 }
 
@@ -148,8 +151,15 @@ async function apiAddExpense(expense) {
     devStore.save(all);
     return newExp;
   }
-  const res = await fetch(`${API_BASE}/add-expense`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(expense) });
-  if (!res.ok) throw new Error('Failed to add expense');
+  const res = await fetch(`${API_BASE}/add-expense`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(expense)
+  });
+  if (!res.ok) {
+    const errData = await res.json().catch(() => ({}));
+    throw new Error(errData.error || `HTTP ${res.status}: Failed to add expense`);
+  }
   return await res.json();
 }
 
@@ -161,8 +171,15 @@ async function apiUpdateExpense(id, expense) {
     devStore.save(all);
     return all[idx];
   }
-  const res = await fetch(`${API_BASE}/update-expense/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(expense) });
-  if (!res.ok) throw new Error('Failed to update expense');
+  const res = await fetch(`${API_BASE}/update-expense/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(expense)
+  });
+  if (!res.ok) {
+    const errData = await res.json().catch(() => ({}));
+    throw new Error(errData.error || `HTTP ${res.status}: Failed to update expense`);
+  }
   return await res.json();
 }
 
@@ -173,7 +190,10 @@ async function apiDeleteExpense(id) {
     return true;
   }
   const res = await fetch(`${API_BASE}/delete-expense/${id}`, { method: 'DELETE' });
-  if (!res.ok) throw new Error('Failed to delete expense');
+  if (!res.ok) {
+    const errData = await res.json().catch(() => ({}));
+    throw new Error(errData.error || `HTTP ${res.status}: Failed to delete expense`);
+  }
   return true;
 }
 
@@ -181,11 +201,31 @@ async function apiUploadReceipt(file, expenseId) {
   if (isOfflineMode()) {
     return URL.createObjectURL(file);
   }
-  const formData = new FormData();
-  formData.append('file', file);
-  formData.append('expenseId', expenseId);
-  const res = await fetch(`${API_BASE}/upload-receipt`, { method: 'POST', body: formData });
-  if (!res.ok) throw new Error('Failed to upload receipt');
+  const base64Data = await new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const res = reader.result;
+      const base64 = typeof res === 'string' && res.includes(',') ? res.split(',')[1] : res;
+      resolve(base64);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+
+  const res = await fetch(`${API_BASE}/upload-receipt`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      filename: file.name,
+      contentType: file.type || 'image/jpeg',
+      data: base64Data,
+      expenseId: expenseId || crypto.randomUUID()
+    })
+  });
+  if (!res.ok) {
+    const errData = await res.json().catch(() => ({}));
+    throw new Error(errData.error || `HTTP ${res.status}: Failed to upload receipt`);
+  }
   const { url } = await res.json();
   return url;
 }

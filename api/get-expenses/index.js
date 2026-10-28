@@ -6,7 +6,7 @@
  * in the specified month and year.
  */
 
-const { container } = require('../shared/cosmosClient');
+const { getContainer } = require('../shared/cosmosClient');
 
 module.exports = async function (context, req) {
   const headers = {
@@ -21,6 +21,7 @@ module.exports = async function (context, req) {
   }
 
   try {
+    const container = await getContainer();
     // Get authenticated user from SWA auth headers
     const userId = getUserId(req);
 
