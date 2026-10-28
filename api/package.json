@@ -1,0 +1,22 @@
+{
+  "name": "expense-tracker-api",
+  "version": "1.0.0",
+  "description": "Azure Functions API for SpendWise Expense Tracker",
+  "main": "index.js",
+  "scripts": {
+    "start": "func start",
+    "test": "echo \"No tests yet\""
+  },
+  "dependencies": {
+    "@azure/cosmos": "^4.0.0",
+    "@azure/storage-blob": "^12.17.0",
+    "uuid": "^9.0.0",
+    "multer": "^1.4.5-lts.1"
+  },
+  "devDependencies": {
+    "azure-functions-core-tools": "^4"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

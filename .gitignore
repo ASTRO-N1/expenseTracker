@@ -1,0 +1,25 @@
+# Dependency directories
+node_modules/
+api/node_modules/
+
+# Azure Functions local config — NEVER COMMIT
+api/local.settings.json
+
+# Build output
+dist/
+.output/
+
+# OS & editor files
+.DS_Store
+Thumbs.db
+.vscode/settings.json
+*.swp
+
+# Logs
+*.log
+npm-debug.log*
+
+# Environment files
+.env
+.env.local
+.env.production
